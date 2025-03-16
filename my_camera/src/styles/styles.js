@@ -4,40 +4,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#000',
   },
   message: {
     textAlign: 'center',
     paddingBottom: 10,
     fontSize: 16,
+    color: 'white',
     marginHorizontal: 20,
   },
   camera: {
     flex: 1,
   },
   buttonContainer: {
-    flex: 1,
+    position: 'absolute',
+    bottom: 40,
+    width: '100%',
     flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   button: {
-    flex: 0.4,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 25,
-    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    padding: 12,
+    borderRadius: 10,
   },
   text: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
   },
   photoButton: {
     width: 70,
     height: 70,
-    alignSelf: 'flex-end',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 35,
@@ -50,22 +50,41 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  photoButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
+  galleryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    padding: 12,
+    borderRadius: 10,
   },
   previewContainer: {
     flex: 1,
     backgroundColor: 'black',
   },
-  previewButtons: {
-    position: 'absolute',
-    bottom: 30,
+  galleryContainer: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 35,
+  },
+  title: {
+    fontSize: 22,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  galleryScrollView: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    paddingHorizontal: 20,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  galleryImage: {
+    width: 100,
+    height: 100,
+    margin: 5,
+    borderRadius: 10,
+  },
+  emptyText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
   },
   retakeButton: {
     backgroundColor: '#fff',
@@ -74,11 +93,80 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 20,
   },
   retakeButtonText: {
     color: '#000',
     fontWeight: 'bold',
   },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: '90%',
+    height: '80%',
+    borderRadius: 10,
+  },
+  closeModalButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  closeModalText: {
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  zoomContainer: {
+    position: 'absolute',
+    right: '5%',
+    top: '25%', 
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  zoomSlider: {
+    width: 100,
+    height: 150,
+    transform: [{ rotate: '-90deg' }], 
+    left: 30,
+  },
+  zoomText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 10,
+    top: 40,
+    left: 20,
+  },
+ 
+    deleteButton: {
+      position: 'absolute',
+      bottom: 53,
+      left: '67%',
+      backgroundColor: 'rgb(255, 255, 255)',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+    },
+    deleteText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    flashButton: {
+      backgroundColor: 'rgba(255, 255, 0, 0.7)', 
+      padding: 10,
+      borderRadius: 10,
+    },
+    flashText: {
+      color: 'black',
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+  
 });
 
 export default styles;
