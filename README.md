@@ -64,16 +64,6 @@ This is a React Native app using `expo-camera` to capture photos, view a gallery
 - This app saves photos to the local file system using Expo FileSystem.
 - Redux is used to manage camera-related state such as flash, zoom, gallery, and current photo preview.
 
-## File Paths
-
-If you encounter module resolution issues, double-check the paths in your `App.js` file:
-```js
-import store from './src/store';
-import Camera from './src/Camera';
-```
-
-Make sure `store.js` is located in the `src/` folder and not in `src/store/`.
-
 ## License
 
 This project is open source and free to use.
