@@ -1,159 +1,121 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Button, Text, TouchableOpacity, View, Image, ScrollView, Modal, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  setGallery,
+  addPhoto,
+  deletePhotoByName,
+  setCapturedImage,
+  clearCapturedImage,
+  setFlashMode,
+  setFacing,
+  setZoom
+} from './store/cameraSlice';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as FileSystem from 'expo-file-system';
+import {
+  View, Text, TouchableOpacity, Image, ScrollView, Modal, Alert
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import styles from './styles/styles';
 
 const CameraScreen = () => {
-  const [facing, setFacing] = useState('back');
+  const dispatch = useDispatch();
+  const cameraRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [gallery, setGallery] = useState([]);
+
+  const facing = useSelector(state => state.camera.facing);
+  const flashMode = useSelector(state => state.camera.flashMode);
+  const zoom = useSelector(state => state.camera.zoom);
+  const gallery = useSelector(state => state.camera.gallery);
+  const capturedImage = useSelector(state => state.camera.capturedImage);
+
   const [showGallery, setShowGallery] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageName, setSelectedImageName] = useState(null);
-  const [zoom, setZoom] = useState(0);
-  
-  // Flash modes according to Expo documentation
-  const FLASH_MODE = {
-    on: 'on',
-    off: 'off',
-    auto: 'auto'
-  };
-  
-  // State for flash mode
-  const [flashMode, setFlashMode] = useState(FLASH_MODE.off);
-  const cameraRef = useRef(null);
-  
+
+  const FLASH_MODE = { on: 'on', off: 'off', auto: 'auto' };
   const PHOTO_DIRECTORY = FileSystem.documentDirectory + 'photos/';
 
-  // Ensure "photos" directory exists
   const ensurePhotoDirectoryExists = async () => {
     const dirInfo = await FileSystem.getInfoAsync(PHOTO_DIRECTORY);
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(PHOTO_DIRECTORY, { intermediates: true });
-      console.log("'photos' directory created!");
     }
   };
 
-  // Load stored images
   const loadGallery = async () => {
-    try {
-      await ensurePhotoDirectoryExists();
-      const files = await FileSystem.readDirectoryAsync(PHOTO_DIRECTORY);
-      const images = files.map(file => ({ uri: PHOTO_DIRECTORY + file, name: file }));
-      setGallery(images);
-      console.log("Gallery loaded with", images.length, "photos!");
-    } catch (error) {
-      console.error("❌ Error loading photos:", error);
-    }
+    await ensurePhotoDirectoryExists();
+    const files = await FileSystem.readDirectoryAsync(PHOTO_DIRECTORY);
+    const images = files.map(file => ({ uri: PHOTO_DIRECTORY + file, name: file }));
+    dispatch(setGallery(images));
   };
 
-  // Load gallery on app start
   useEffect(() => {
     loadGallery();
   }, []);
 
-  // Toggle between front and back camera
   const toggleCameraFacing = () => {
-    setFacing((current) => (current === 'back' ? 'front' : 'back'));
-  };
-  
-  // Function to toggle flash modes
-  const toggleFlashMode = () => {
-    setFlashMode((currentMode) => {
-      switch (currentMode) {
-        case FLASH_MODE.off:
-          return FLASH_MODE.on;
-        case FLASH_MODE.on:
-          return FLASH_MODE.auto;
-        case FLASH_MODE.auto:
-          return FLASH_MODE.off;
-        default:
-          return FLASH_MODE.off;
-      }
-    });
-  };
-  
-  // Function to get the flash icon based on the mode
-  const getFlashIcon = () => {
-    switch (flashMode) {
-      case FLASH_MODE.on:
-        return '⚡';
-      case FLASH_MODE.auto:
-        return '⚡A';
-      case FLASH_MODE.off:
-        return '⚡❌';
-      default:
-        return '⚡❌';
-    }
+    dispatch(setFacing(facing === 'back' ? 'front' : 'back'));
   };
 
-  // Take a photo and save it
+  const toggleFlashMode = () => {
+    const nextMode = flashMode === FLASH_MODE.off ? FLASH_MODE.on
+                    : flashMode === FLASH_MODE.on ? FLASH_MODE.auto
+                    : FLASH_MODE.off;
+    dispatch(setFlashMode(nextMode));
+  };
+
+  const getFlashIcon = () => {
+    return flashMode === FLASH_MODE.on ? '⚡'
+         : flashMode === FLASH_MODE.auto ? '⚡A'
+         : '⚡❌';
+  };
+
   const takePicture = async () => {
     if (!cameraRef.current) return;
-    try {
-      const photo = await cameraRef.current.takePictureAsync();
-      const fileName = `photo_${Date.now()}.jpg`;
-      const fileUri = PHOTO_DIRECTORY + fileName;
+    const photo = await cameraRef.current.takePictureAsync();
+    const fileName = `photo_${Date.now()}.jpg`;
+    const fileUri = PHOTO_DIRECTORY + fileName;
 
-      await ensurePhotoDirectoryExists();
-      await FileSystem.moveAsync({ from: photo.uri, to: fileUri });
+    await ensurePhotoDirectoryExists();
+    await FileSystem.moveAsync({ from: photo.uri, to: fileUri });
 
-      setPreviewVisible(true);
-      setCapturedImage({ uri: fileUri });
-      setGallery([...gallery, { uri: fileUri, name: fileName }]);
-
-      console.log(" Photo taken and saved:", fileUri);
-    } catch (error) {
-      console.error(" Error taking photo:", error);
-    }
+    dispatch(setCapturedImage({ uri: fileUri }));
+    dispatch(addPhoto({ uri: fileUri, name: fileName }));
   };
 
-  // Delete a photo from fullscreen
-  const deletePhoto = async () => {
-    try {
-      if (!selectedImageName) return;
+  const deletePhoto = () => {
+    if (!selectedImageName) return;
 
-      const fileUri = PHOTO_DIRECTORY + selectedImageName;
-      
-      // Confirm before deleting
-      Alert.alert(
-        "Delete Photo",
-        "Are you sure you want to delete this photo?",
-        [
-          { text: "Cancel", style: "cancel" },
-          { 
-            text: "Delete", 
-            style: "destructive", 
-            onPress: async () => {
-              await FileSystem.deleteAsync(fileUri);
-              setGallery(gallery.filter(photo => photo.name !== selectedImageName));
-              setSelectedImage(null);
-              setSelectedImageName(null);
-              console.log(" Photo deleted:", fileUri);
-            }
+    Alert.alert(
+      "Delete Photo",
+      "Are you sure you want to delete this photo?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const fileUri = PHOTO_DIRECTORY + selectedImageName;
+            await FileSystem.deleteAsync(fileUri);
+            dispatch(deletePhotoByName(selectedImageName));
+            setSelectedImage(null);
+            setSelectedImageName(null);
           }
-        ]
-      );
-    } catch (error) {
-      console.error(" Error deleting photo:", error);
-    }
+        }
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
-      {/* Fullscreen Image Modal with Delete Button */}
       <Modal visible={!!selectedImage} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} />
-          {/* Delete Button */}
           <TouchableOpacity style={styles.deleteButton} onPress={deletePhoto}>
             <Text style={styles.deleteText}>🗑</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.closeModalButton} onPress={() => { 
+          <TouchableOpacity style={styles.closeModalButton} onPress={() => {
             setSelectedImage(null);
             setSelectedImageName(null);
           }}>
@@ -168,9 +130,9 @@ const CameraScreen = () => {
           <ScrollView contentContainerStyle={styles.galleryScrollView}>
             {gallery.length > 0 ? (
               gallery.map((image, index) => (
-                <TouchableOpacity key={index} onPress={() => { 
-                  setSelectedImage(image.uri); 
-                  setSelectedImageName(image.name); 
+                <TouchableOpacity key={index} onPress={() => {
+                  setSelectedImage(image.uri);
+                  setSelectedImageName(image.name);
                 }}>
                   <Image source={{ uri: image.uri }} style={styles.galleryImage} />
                 </TouchableOpacity>
@@ -183,19 +145,19 @@ const CameraScreen = () => {
             <Text style={styles.retakeButtonText}>Back</Text>
           </TouchableOpacity>
         </View>
-      ) : previewVisible && capturedImage ? (
+      ) : capturedImage ? (
         <View style={styles.previewContainer}>
           <Image source={{ uri: capturedImage.uri }} style={styles.camera} />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => setCapturedImage(null)}>
+            <TouchableOpacity style={styles.button} onPress={() => dispatch(clearCapturedImage())}>
               <Text style={styles.text}>Retake</Text>
             </TouchableOpacity>
           </View>
         </View>
       ) : (
-        <CameraView 
-          style={styles.camera} 
-          facing={facing} 
+        <CameraView
+          style={styles.camera}
+          facing={facing}
           zoom={zoom}
           flash={flashMode}
           ref={cameraRef}
@@ -204,12 +166,9 @@ const CameraScreen = () => {
             <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
               <Text style={styles.text}>🔄</Text>
             </TouchableOpacity>
-            
-            {/* Flash button */}
             <TouchableOpacity style={styles.button} onPress={toggleFlashMode}>
               <Text style={styles.text}>{getFlashIcon()}</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity onPress={takePicture} style={styles.photoButton}>
               <Text style={styles.text}>Capture</Text>
             </TouchableOpacity>
@@ -218,7 +177,6 @@ const CameraScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Zoom Slider */}
           <View style={styles.zoomContainer}>
             <Slider
               style={styles.zoomSlider}
@@ -226,7 +184,7 @@ const CameraScreen = () => {
               maximumValue={1}
               step={0.05}
               value={zoom}
-              onValueChange={(value) => setZoom(value)}
+              onValueChange={(value) => dispatch(setZoom(value))}
               minimumTrackTintColor="white"
               maximumTrackTintColor="gray"
               thumbTintColor="white"

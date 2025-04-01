@@ -1,74 +1,80 @@
-# 📷 Photo App
+# Camera App with Redux
 
-A React Native camera application built with **Expo**, featuring **photo capture, zoom functionality, flash toggle, and a built-in gallery**.
+This is a React Native app using `expo-camera` to capture photos, view a gallery, and manage camera settings like flash, zoom, and front/back camera toggle. The application state is fully managed using Redux Toolkit.
 
-## 🚀 Features
+## Features
 
-- 📸 Capture photos and save them locally.
-- 🔍 Zoom functionality using a slider.
-- ⚡ Toggle between **flash on, off, and auto**.
-- 🔄 Switch between **front and back cameras**.
-- 🖼️ View saved photos in the gallery.
-- 🗑️ Delete photos from the gallery.
+- Take photos using the device camera
+- Save photos locally to the file system
+- View photos in a gallery with fullscreen preview
+- Delete photos from the gallery
+- Toggle between front and back cameras
+- Control flash mode (on, off, auto)
+- Control camera zoom with a slider
+- Redux Toolkit for global state management
 
----
+## Technologies Used
 
-## 📂 Project Structure
+- React Native (with Expo)
+- Redux Toolkit
+- React Redux
+- Expo Camera
+- Expo File System
+
+## Project Structure
 
 ```
-photp-app/
-│── my_camera/
-│   ├── src/
-│   │   ├── Camera.js  # Main camera screen
-│   │   ├── styles/
-│   │   │   ├── styles.js  # Styling for the app
-│   ├── package.json  # Dependencies
-│   ├── .gitignore  # Ignoring unnecessary files
+.
+├── App.js
+├── src
+│   ├── Camera.js
+│   ├── store.js
+│   └── store
+│       └── cameraSlice.js
+└── styles
+    └── styles.js
 ```
 
----
+## Installation
 
-## 🛠️ Installation & Setup
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <project-folder>
+   ```
 
-### 1️⃣ **Clone the repository**
-```sh
-git clone https://github.com/your-username/photp-app.git
-cd photp-app/my_camera
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Install Expo CLI globally (if not already installed):
+   ```bash
+   npm install -g expo-cli
+   ```
+
+4. Start the development server:
+   ```bash
+   npx expo start
+   ```
+
+## Important Notes
+
+- Ensure you grant camera permissions when prompted.
+- This app saves photos to the local file system using Expo FileSystem.
+- Redux is used to manage camera-related state such as flash, zoom, gallery, and current photo preview.
+
+## File Paths
+
+If you encounter module resolution issues, double-check the paths in your `App.js` file:
+```js
+import store from './src/store';
+import Camera from './src/Camera';
 ```
 
-### 2️⃣ **Install dependencies**
-```sh
-npm install
-```
+Make sure `store.js` is located in the `src/` folder and not in `src/store/`.
 
-### 3️⃣ **Run the app**
-```sh
-npx expo start
-```
-📱 Scan the QR code with your Expo Go app (Android/iOS) to launch the project.
+## License
 
----
-
-## 🎮 Usage
-
-- **Take a photo**: Press the capture button.
-- **Switch cameras**: Tap the camera toggle button.
-- **Adjust zoom**: Use the slider on the right.
-- **Enable flash**: Tap the flash button to cycle through flash modes.
-- **Open gallery**: Tap the gallery button to view saved photos.
-- **Delete a photo**: Open a photo in fullscreen and tap the delete button.
-
----
-
-## 🛑 Known Issues
-
-- The flash might not work on all devices due to hardware limitations.
-- Expo Go does not support some native camera features (consider **EAS Build** for production).
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
-
+This project is open source and free to use.
 ---
